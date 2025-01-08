@@ -28,7 +28,7 @@ public class Response<T> {
     // 데이터
     private T payload;
 
-    public Response(ApiError apiError) {
+    public Response (ApiError apiError) {
         this.errorId = UUID.randomUUID().toString();
         this.code = apiError.getCode();
         this.message = apiError.getMessage();

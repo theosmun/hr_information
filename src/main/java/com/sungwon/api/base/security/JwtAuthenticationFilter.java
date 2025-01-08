@@ -27,29 +27,34 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 
+/**
+ * JWT 기반 인증 필터
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class JwtAuthenticationFilter  extends OncePerRequestFilter {
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String BEARER = "Bearer";
     private static final String GAP = " ";
     private final UserMapper userMapper;
     private final JwtTokenUtils jwtUtil;
 
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        try{
-            if(request.getRequestURI().startsWith("api/suth")){
-                filterChain.doFilter(request, response);
+        try {
+            // /api/auth/refresh 경로에서 필터를 실행하지 않도록 예외 처리
+            if (request.getRequestURI().startsWith("/api/auth")) {
+                filterChain.doFilter(request, response); // 필터를 건너뛰고 다음 필터로 이동
                 return;
             }
+
             String authHeader = request.getHeader("Authorization");
-            if(authHeader == null){
+            if (authHeader != null) {
                 String token = authHeader.startsWith(BEARER) ? authHeader.split(GAP)[1] : authHeader;
 
-                Claims claims  = jwtUtil.getTokenInfo(token);
-                String userId = claims.get("Userid").toString();
+                // 토큰 정보
+                Claims claims = jwtUtil.getTokenInfo(token);
+                String userId = claims.get("USER_ID").toString();
 
                 // 사용자 정보
                 User userInfo = userMapper.getUserByUserId(userId);
@@ -61,12 +66,11 @@ public class JwtAuthenticationFilter  extends OncePerRequestFilter {
                 // 인증
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userInfo, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-
             }
+
             // 다음 필터
             filterChain.doFilter(request, response);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Response<String> errorResponse;
             if (e instanceof ExpiredJwtException) {
                 errorResponse = new Response<>(ApiError.TOKEN_EXPIRED);
@@ -90,3 +94,4 @@ public class JwtAuthenticationFilter  extends OncePerRequestFilter {
         }
     }
 }
+

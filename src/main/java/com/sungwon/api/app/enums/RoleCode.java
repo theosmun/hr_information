@@ -23,4 +23,5 @@ public enum RoleCode {
                 .findAny()
                 .orElseThrow(() -> new CustomException(ApiError.SYSTEM_USER_ERROR));
     }
+
 }

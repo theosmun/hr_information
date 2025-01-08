@@ -23,4 +23,5 @@ public enum ApiError {
 
     private final String code;
     private final String message;
+
 }

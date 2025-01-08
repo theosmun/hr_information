@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sungwon.api.app.mapper.UserMapper">
+
+    <select id="getUserByUserId" resultType="User">
+        SELECT
+            USER_NO,
+            USER_ID,
+            USER_NAME,
+            PASSWORD,
+            REFRESH_TOKEN,
+            REMARK,
+            ROLE,
+            CREATE_DTM,
+            UPDATE_DTM
+        FROM
+            TBL_USER
+        WHERE
+            USER_ID = #{ userId }
+    </select>
+
+    <insert id="saveUserInfo" parameterType="User">
+        INSERT INTO TBL_USER (
+            USER_ID,
+            USER_NAME,
+            PASSWORD,
+            REMARK,
+            ROLE,
+            CREATE_DTM,
+            UPDATE_DTM,
+            REFRESH_TOKEN
+        ) VALUES (
+                     #{userId},
+                     #{userName},
+                     #{password},
+                     #{remark},
+                     #{role},
+                     NOW(),
+                     NOW(),
+                     #{refreshToken}
+                         )
+            ON CONFLICT (USER_ID)
+    DO UPDATE SET
+            USER_NAME = EXCLUDED.USER_NAME,
+                       PASSWORD = EXCLUDED.PASSWORD,
+                       REFRESH_TOKEN = EXCLUDED.REFRESH_TOKEN,
+                       REMARK = EXCLUDED.REMARK,
+                       ROLE = EXCLUDED.ROLE,
+                       UPDATE_DTM = NOW();
+    </insert>
+
+    <select id="getUserList" resultType="User" parameterType="UserSearch">
+        SELECT
+            USER_NO,
+            USER_ID,
+            USER_NAME,
+            PASSWORD,
+            REFRESH_TOKEN,
+            REMARK,
+            ROLE,
+            CREATE_DTM,
+            UPDATE_DTM,
+            COUNT(1) OVER() AS TOTAL_COUNT
+        FROM
+            TBL_USER
+        <where>
+            <if test="userId != null and userId != ''">
+                AND USER_ID LIKE CONCAT('%', #{userId}, '%')
+            </if>
+            <if test="userName != null and userName != ''">
+                AND USER_NAME LIKE CONCAT('%', #{userName}, '%')
+            </if>
+            <if test="role != null and role != 'ALL'">
+                AND ROLE = #{role}
+            </if>
+        </where>
+    </select>
+
+    <update id="saveUserList" parameterType="User">
+        <foreach collection="userInfoList" item="userInfo" separator=";">
+            UPDATE TBL_USER
+            SET
+            <if test="userInfo.userId != null and userInfo.userId != ''">
+                USER_ID = #{ userInfo.userId },
+            </if>
+
+            <if test="userInfo.userName != null and userInfo.userName != ''">
+                USER_NAME = #{ userInfo.userName },
+            </if>
+
+            <if test="userInfo.remark != null and userInfo.remark != ''">
+                REMARK = #{ userInfo.remark },
+            </if>
+
+            <if test="userInfo.role != null">
+                ROLE = #{ userInfo.role },
+            </if>
+
+            UPDATE_DTM = NOW()
+            WHERE
+            USER_NO = #{ userInfo.userNo }
+        </foreach>
+    </update>
+</mapper>
