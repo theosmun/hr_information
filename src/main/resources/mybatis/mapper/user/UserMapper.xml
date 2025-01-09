@@ -79,6 +79,26 @@
         </where>
     </select>
 
+    <select id="existsByUserId" resultType="User">
+        SELECT
+            USER_NO,
+            USER_ID,
+            USER_NAME,
+            PASSWORD,
+            REFRESH_TOKEN,
+            REMARK,
+            ROLE,
+            CREATE_DTM,
+            UPDATE_DTM
+        FROM
+            TBL_USER
+        WHERE
+            USER_NO != #{ userNo }
+          AND USER_ID = #{ userId }
+            LIMIT
+            1
+    </select>
+
     <update id="saveUserList" parameterType="User">
         <foreach collection="userInfoList" item="userInfo" separator=";">
             UPDATE TBL_USER
@@ -104,4 +124,12 @@
             USER_NO = #{ userInfo.userNo }
         </foreach>
     </update>
+
+    <delete id="deleteUserList" parameterType="map">
+        DELETE FROM TBL_USER
+        WHERE USER_NO IN
+        <foreach collection="userInfoList" item="userInfo" open="(" separator="," close=")">
+            #{userInfo.userNo}
+        </foreach>
+    </delete>
 </mapper>

@@ -60,12 +60,12 @@ public class UserController {
     /**
      * 사용자 목록 저장
      *
-     * @author : 정승현
-     * @since : 2024.12.19
+     * @author : 문성원
+     * @since : 2024.01.08
      */
     @PostMapping("")
-    public Response<String> saveUserList(@RequestBody List<User> userList) {
-        userService.saveUserList(userList);
+    public Response<String> saveUserList(@RequestBody List<User> userInfoList) {
+        userService.saveUserList(userInfoList);
         return new Response<String>().setPayload(CommonConstant.SUCCESS);
     }
 
@@ -73,26 +73,39 @@ public class UserController {
     /**
      * 사용자 목록 삭제
      *
-     * @author : 정승현
-     * @since : 2024.12.24
+     * @author : 문성원
+     * @since : 2024.01.08
      */
+    @DeleteMapping("")
+    public Response<String> deleteUserList(@RequestBody List<User> userInfoList) {
+        userService.deleteUserList(userInfoList);
+        return new Response<String>().setPayload(CommonConstant.SUCCESS);
+    }
 
 
     /**
      * 비밀번호 일치 여부 조회
      *
-     * @author : 정승현
-     * @since : 2024.12.15
+     * @author : 문성원
+     * @since : 2024.01.09
      */
-
+    @PostMapping("/{userId}/password/match")
+    public Response<Boolean> matchPassword(@RequestBody UserSearch search) {
+        boolean isMatch = userService.matchPassword(search);
+        return new Response<Boolean>().setPayload(isMatch);
+    }
 
     /**
      * 비밀번호 초기화
      *
-     * @author : 정승현
-     * @since : 2024.12.15
+     * @author : 문성원
+     * @since : 2024.01.09
      */
-
+    @PostMapping("{userId}/password/reset")
+    public Response<String> resetPassword(@RequestBody UserSearch search) {
+        userService.resetPassword(search.getUserId());
+        return new Response<String>().setPayload(CommonConstant.SUCCESS);
+    }
 
     /**
      * 비밀번호 변경
@@ -100,6 +113,11 @@ public class UserController {
      * @author : 정승현
      * @since : 2024.12.15
      */
+    @PostMapping("{userId}/password/change")
+    public Response<String> changePassword(@RequestBody UserSearch search) {
+
+        return new Response<String>().setPayload(CommonConstant.SUCCESS);
+    }
 
 
     /**
