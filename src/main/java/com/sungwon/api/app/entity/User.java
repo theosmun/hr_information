@@ -26,4 +26,7 @@ public class User extends BaseEntity {
 
     // 권한
     private String role;
+
+    //고유번호
+    private String deviceId;
 }

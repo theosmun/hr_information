@@ -15,7 +15,8 @@
             REMARK,
             ROLE,
             CREATE_DTM,
-            UPDATE_DTM
+            UPDATE_DTM,
+            DEVICEID
         FROM
             TBL_USER
         WHERE
@@ -31,7 +32,8 @@
             ROLE,
             CREATE_DTM,
             UPDATE_DTM,
-            REFRESH_TOKEN
+            REFRESH_TOKEN,
+            DEVICEIDsaveUserInfo
         ) VALUES (
                      #{userId},
                      #{userName},
@@ -40,16 +42,18 @@
                      #{role},
                      NOW(),
                      NOW(),
-                     #{refreshToken}
+                     #{refreshToken},
+                     #{deviceId}
                          )
             ON CONFLICT (USER_ID)
     DO UPDATE SET
-            USER_NAME = EXCLUDED.USER_NAME,
-                       PASSWORD = EXCLUDED.PASSWORD,
-                       REFRESH_TOKEN = EXCLUDED.REFRESH_TOKEN,
-                       REMARK = EXCLUDED.REMARK,
-                       ROLE = EXCLUDED.ROLE,
-                       UPDATE_DTM = NOW();
+           USER_NAME = EXCLUDED.USER_NAME,
+           PASSWORD = EXCLUDED.PASSWORD,
+           REFRESH_TOKEN = EXCLUDED.REFRESH_TOKEN,
+           REMARK = EXCLUDED.REMARK,
+           ROLE = EXCLUDED.ROLE,
+           UPDATE_DTM = NOW(),
+           DEVICEID = EXCLUDED.DEVICEID;
     </insert>
 
     <select id="getUserList" resultType="User" parameterType="UserSearch">

@@ -9,6 +9,7 @@ public enum ApiError {
     // 시스템
     SYSTEM_SERVER_ERROR("9000", "알 수 없는 에러 입니다."),
     SYSTEM_USER_ERROR("9001", "요청 정보가 잘 못 되었습니다."),
+    SESSION_EXPIRED_BY_ANOTHER_LOGIN("9002", "다른 장치에서 로그인이 감지되어 로그아웃되었습니다."),
 
     // 사용자
     USER_NOT_FOUND("7000", "사용자 정보를 찾을 수 없습니다."),

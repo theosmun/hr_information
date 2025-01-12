@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -16,11 +17,13 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+
 @Configuration
 @RequiredArgsConstructor
-
+@EnableMethodSecurity
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     private static final String[] ADMIN_URL = {
             "/api/menu",
@@ -48,10 +51,9 @@ public class SecurityConfig {
                 )
 
                 // 커스텀 JWT 인증 필터를 기본 UsernamePasswordAuthenticationFilter 앞에 추가
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 // 접근 거부 상황에 대한 커스텀 예외 처리를 정의
-//                .exceptionHandling(error -> error.accessDeniedHandler(customAccessDeniedHandler));
+                .exceptionHandling(error -> error.accessDeniedHandler(customAccessDeniedHandler));
 
         // 설정된 SecurityFilterChain을 생성하여 반환
         return http.build();

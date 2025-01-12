@@ -51,4 +51,9 @@ public class JwtTokenUtils {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
+    public String getUuidFromToken(String token) {
+        Claims claims = getTokenInfo(token);
+        return claims.get("ID", String.class); // "ID" 클레임에서 uuid 추출
+    }
 }

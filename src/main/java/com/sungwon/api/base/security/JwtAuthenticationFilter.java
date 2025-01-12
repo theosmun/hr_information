@@ -6,6 +6,7 @@ import com.sungwon.api.app.enums.RoleCode;
 import com.sungwon.api.app.mapper.UserMapper;
 import com.sungwon.api.base.advice.ApiError;
 import com.sungwon.api.base.entity.Response;
+import com.sungwon.api.base.exception.CustomException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -42,8 +43,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
-            // /api/auth/refresh 경로에서 필터를 실행하지 않도록 예외 처리
-            if (request.getRequestURI().startsWith("/api/auth")) {
+            // /api/auth/login과 /api/auth/refresh 경로에서 필터를 실행하지 않도록 예외 처리
+            if (request.getRequestURI().equals("/api/auth/login") || request.getRequestURI().equals("/api/auth/refresh")) {
                 filterChain.doFilter(request, response); // 필터를 건너뛰고 다음 필터로 이동
                 return;
             }
@@ -54,10 +55,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 // 토큰 정보
                 Claims claims = jwtUtil.getTokenInfo(token);
+                String uuid = jwtUtil.getUuidFromToken(token);
+
                 String userId = claims.get("USER_ID").toString();
 
                 // 사용자 정보
                 User userInfo = userMapper.getUserByUserId(userId);
+
+                if (!uuid.equals(userInfo.getDeviceId())) {
+                    throw new CustomException(ApiError.SESSION_EXPIRED_BY_ANOTHER_LOGIN);
+                }
 
                 // 권한 정보
                 RoleCode roleCode = RoleCode.findByCode(userInfo.getRole());
@@ -70,7 +77,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // 다음 필터
             filterChain.doFilter(request, response);
-        } catch (Exception e) {
+        }
+        catch (CustomException e) {
+            Response<String> errorResponse;
+            errorResponse = new Response<>(ApiError.SESSION_EXPIRED_BY_ANOTHER_LOGIN);
+            response.setContentType("application/json");
+            response.getWriter().write(new ObjectMapper().writeValueAsString(errorResponse));
+
+        }catch (Exception e) {
             Response<String> errorResponse;
             if (e instanceof ExpiredJwtException) {
                 errorResponse = new Response<>(ApiError.TOKEN_EXPIRED);

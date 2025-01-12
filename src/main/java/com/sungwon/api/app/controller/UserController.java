@@ -115,7 +115,7 @@ public class UserController {
      */
     @PostMapping("{userId}/password/change")
     public Response<String> changePassword(@RequestBody UserSearch search) {
-
+        userService.changePassword(search);
         return new Response<String>().setPayload(CommonConstant.SUCCESS);
     }
 
